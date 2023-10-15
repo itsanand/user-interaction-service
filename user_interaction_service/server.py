@@ -6,13 +6,13 @@ from user_interaction_service.endpoints.user_interaction import UserInteractionE
 user_interaction: UserInteractionEndpoint = UserInteractionEndpoint()
 
 routes: list[Route] = [
+    Route("/contents", user_interaction.fetch_like_and_read, methods=["GET"]),
     Route(
         "/content/{title}/user/{id}/like", user_interaction.add_like, methods=["POST"]
     ),
     Route(
         "/content/{title}/user/{id}/read", user_interaction.add_read, methods=["POST"]
     ),
-    Route("/content/{title}", user_interaction.fetch_like_and_read, methods=["GET"]),
 ]
 
 app: Starlette = Starlette(routes=routes)
