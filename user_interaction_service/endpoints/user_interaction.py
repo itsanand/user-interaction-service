@@ -1,10 +1,15 @@
 """Handles endpoints for user interaction service"""
 from typing import Final
+from httpx import ConnectError
 from starlette.requests import Request
 from starlette.responses import JSONResponse
 from user_interaction_service.services.user_interaction import InteractionService
 from user_interaction_service.models import ASYNC_DB_ENGINE
-from user_interaction_service.exceptions import UserDoesNotExistError, InvalidRequest
+from user_interaction_service.exceptions import (
+    UserDoesNotExistError,
+    InvalidRequest,
+    InternalCommunication,
+)
 
 
 class UserInteractionEndpoint:
@@ -16,6 +21,7 @@ class UserInteractionEndpoint:
     SUCCESS: Final[int] = 200
     INTERNAL_AUTH_VAL: Final[str] = "content"
     BAD_REQUEST: Final[int] = 404
+    SERVER_ERROR: Final[int] = 500
 
     @classmethod
     async def add_like(cls, request: Request) -> JSONResponse:
@@ -32,6 +38,10 @@ class UserInteractionEndpoint:
             )
         except KeyError:
             return JSONResponse(InvalidRequest.error(), status_code=cls.BAD_REQUEST)
+        except ConnectError:
+            return JSONResponse(
+                InternalCommunication.error(), status_code=cls.SERVER_ERROR
+            )
 
     @classmethod
     async def add_read(cls, request: Request) -> JSONResponse:
@@ -48,6 +58,10 @@ class UserInteractionEndpoint:
             )
         except KeyError:
             return JSONResponse(InvalidRequest.error(), status_code=cls.BAD_REQUEST)
+        except ConnectError:
+            return JSONResponse(
+                InternalCommunication.error(), status_code=cls.SERVER_ERROR
+            )
 
     @classmethod
     async def fetch_like_and_read(cls, request: Request) -> JSONResponse:
