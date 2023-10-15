@@ -1,0 +1,182 @@
+openapi: 3.0.3
+info:
+  title: User interaction Service - OpenAPI 3.0
+  description: User Interaction service to record read and likes of contents
+  contact:
+    email: cu.18bcs2174@gmail.com
+  version: 1.0.0
+servers:
+  - url: http://localhost:7000
+paths:
+  /contents:
+    get:
+      description: fetch content total read and write
+      operationId: get-contents
+      parameters:
+        - in: query
+          name: page
+          schema:
+            type: integer
+        - in: header
+          name: x-internal
+          schema:
+            type: string
+          required: true
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    title:
+                      type: string
+                      example: title1
+                    totalReads:
+                      type: integer
+                      example: 10
+                    totalLikes:
+                      type: integer
+                      example: 5 
+        '400':
+          description: Missing CSV file from body
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    example: 400
+                  error:
+                    type: string
+                    example: Invalid request data
+  /content/{title}/user/{id}/like:
+    get:
+      description: add like event for content 
+      operationId: add-read
+      parameters:
+        - in: path
+          name: title
+          schema:
+            type: string
+          required: true
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                nullable: true
+                example: null
+        '404':
+          description: User does not exist
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    example: 404
+                  error:
+                    type: string
+                    example: User not Found
+        '400':
+          description: Invalid page value
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    example: 400
+                  error:
+                    type: string
+                    example: Invalid request data
+        '500':
+          description: Internal communication Failed
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    example: 500
+                  error:
+                    type: string
+                    example: Internal Server Communication Error
+  /content/{title}/user/{id}/read:
+    get:
+      description: add like event for content
+      operationId: add-like
+      parameters:
+        - in: path
+          name: title
+          schema:
+            type: string
+          required: true
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                nullable: true
+                example: null
+        '404':
+          description: User does not exist
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    example: 404
+                  error:
+                    type: string
+                    example: User not Found
+        '400':
+          description: Invalid page value
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    example: 400
+                  error:
+                    type: string
+                    example: Invalid request data
+        '500':
+          description: Internal communication Failed
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    example: 500
+                  error:
+                    type: string
+                    example: Internal Server Communication Error
