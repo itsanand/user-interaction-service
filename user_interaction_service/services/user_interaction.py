@@ -15,6 +15,10 @@ class InteractionService:
     """User interaction service class"""
 
     NOT_FOUND: Final[int] = 404
+    DATA_PER_PAGE: Final[int] = 100
+    INTERNAL_HEADERS: dict[str, str] = {
+        "x-internal": "interaction",
+    }
 
     def __init__(self, db_engine: AsyncEngine) -> None:
         self.async_session = sessionmaker(
@@ -27,13 +31,13 @@ class InteractionService:
 
         async with AsyncClient(timeout=10.0) as client:
             url: str = f"{Config.USER_SERVICE_HOST}/user/{user_id}"
-            user: Response = await client.get(url)
+            user: Response = await client.get(url, headers=cls.INTERNAL_HEADERS)
             return user.status_code != cls.NOT_FOUND
 
     async def add_content_like(self, user_id: str, title: str) -> None:
         """Create user interaction entry with like enum"""
 
-        if not self.user_exists(user_id):
+        if not await self.user_exists(user_id):
             raise ValueError
         async with self.async_session() as db_session:  # type: ignore
             try:
@@ -44,7 +48,7 @@ class InteractionService:
                 )
                 db_session.add(interaction)
                 await db_session.commit()
-            except IntegrityError as error:
+            except IntegrityError:
                 await db_session.rollback()
             except Exception as error:
                 db_session.rollback()
@@ -53,7 +57,7 @@ class InteractionService:
     async def add_content_read(self, user_id: str, title: str) -> None:
         """Create user interaction entry with read enum"""
 
-        if not self.user_exists(user_id):
+        if not await self.user_exists(user_id):
             raise ValueError
         async with self.async_session() as db_session:  # type: ignore
             try:
@@ -64,36 +68,45 @@ class InteractionService:
                 )
                 db_session.add(interaction)
                 await db_session.commit()
-            except IntegrityError as error:
+            except IntegrityError:
                 await db_session.rollback()
             except Exception as error:
                 db_session.rollback()
                 raise error
 
-    async def read_like_and_read_service(
-        self, title: str
-    ) -> list[dict[str, int | str]]:
+    async def read_like_and_read_service(self, page: int) -> list[dict[str, int | str]]:
         """Read content based on the content title"""
 
         async with self.async_session() as db_session:  # type: ignore
-            query = select(
-                func.count()  # pylint: disable=not-callable
-                .filter(
-                    Interaction.contentTitle == title,
-                    Interaction.operationType == OperationType.READ,
+            query = (
+                select(
+                    Interaction.contentTitle,
+                    func.count()  # pylint: disable=not-callable
+                    .filter(Interaction.operationType == OperationType.READ)
+                    .label("reads"),
+                    func.count()  # pylint: disable=not-callable
+                    .filter(Interaction.operationType == OperationType.LIKE)
+                    .label("likes"),
                 )
-                .label("reads"),
-                func.count()  # pylint: disable=not-callable
-                .filter(
-                    Interaction.contentTitle == title,
-                    Interaction.operationType == OperationType.LIKE,
+                .group_by(Interaction.contentTitle)
+                .order_by(
+                    func.count()  # pylint: disable=not-callable
+                    .filter(Interaction.operationType == OperationType.LIKE)
+                    .desc(),
+                    func.count()  # pylint: disable=not-callable
+                    .filter(Interaction.operationType == OperationType.READ)
+                    .desc(),
                 )
-                .label("likes"),
+                .offset((page - 1) * self.DATA_PER_PAGE)
+                .limit(page * self.DATA_PER_PAGE)
             )
             interaction: Interaction = await db_session.execute(query)
-            interaction_data = interaction.first()
-            return {
-                "title": title,
-                "total_read": interaction_data.reads,  # type: ignore
-                "total_like": interaction_data.likes,  # type: ignore
-            }
+            interaction_data = interaction.all()
+            return [
+                {
+                    "title": interaction.contentTitle,
+                    "totalReads": interaction.reads,  # type: ignore
+                    "totalLikes": interaction.likes,  # type: ignore
+                }
+                for interaction in interaction_data
+            ]

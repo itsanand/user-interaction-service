@@ -54,12 +54,12 @@ class UserInteractionEndpoint:
         """Handles read content read and like endpoint"""
 
         try:
-            title: str = request.path_params["title"]
+            page: str = request.query_params.get("page", "1")
             x_internal: str = request.headers["x-internal"]
             if x_internal != cls.INTERNAL_AUTH_VAL:
                 raise KeyError
             data: list[dict[str, int | str]] = await cls.svc.read_like_and_read_service(
-                title
+                int(page)
             )
             return JSONResponse(data, status_code=cls.SUCCESS)
         except KeyError:
