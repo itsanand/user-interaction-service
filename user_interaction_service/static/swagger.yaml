@@ -55,7 +55,7 @@ paths:
                     type: string
                     example: Invalid request data
   /content/{title}/user/{id}/like:
-    get:
+    post:
       description: add like event for content 
       operationId: add-read
       parameters:
@@ -118,7 +118,7 @@ paths:
                     type: string
                     example: Internal Server Communication Error
   /content/{title}/user/{id}/read:
-    get:
+    post:
       description: add like event for content
       operationId: add-like
       parameters:

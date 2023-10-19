@@ -30,7 +30,7 @@ class InteractionService:
         """check if user exists in user service repo"""
 
         async with AsyncClient(timeout=10.0) as client:
-            url: str = f"{Config.USER_SERVICE_HOST}/user/{user_id}"
+            url: str = f"http://{Config.USER_SERVICE_HOST}/user/{user_id}"
             user: Response = await client.get(url, headers=cls.INTERNAL_HEADERS)
             return user.status_code != cls.NOT_FOUND
 
