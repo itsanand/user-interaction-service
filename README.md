@@ -28,7 +28,7 @@ http://localhost:9000/content-service/docs
 
 ```py
 class Interaction:
-    """User model"""
+    """User Interaction model"""
 
     __tablename__ = "Interaction"
     userID: Column = Column(String)
