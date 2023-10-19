@@ -1,10 +1,12 @@
 """Handles User Interaction App Server"""
+from sqlalchemy import inspect
 from starlette.applications import Starlette
 from starlette.routing import Route
 from starlette.middleware import Middleware
 from starlette.middleware.cors import CORSMiddleware
 from user_interaction_service.endpoints.user_interaction import UserInteractionEndpoint
 from user_interaction_service.endpoints.swagger_doc import SwaggerDoc
+from user_interaction_service.models import BASE, DB_ENGINE
 
 user_interaction: UserInteractionEndpoint = UserInteractionEndpoint()
 swagger_doc: SwaggerDoc = SwaggerDoc()
@@ -32,4 +34,14 @@ middleware = [
     ),
 ]
 
+
+def on_startup():
+    """Check if table exist or not and create table"""
+    inspector = inspect(DB_ENGINE)
+    if not inspector.has_table("Interaction"):
+        BASE.metadata.create_all(DB_ENGINE)
+
+
 app: Starlette = Starlette(routes=routes, middleware=middleware)
+
+app.add_event_handler("startup", on_startup)

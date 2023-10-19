@@ -6,11 +6,9 @@ CONFIG = Config(".env")
 BASE_DIR = Path(__file__).parent
 
 
-USER_SERVICE_HOST = CONFIG(
-    "USER_SERVICE_HOST", cast=str, default="http://localhost:8000"
-)
+USER_SERVICE_HOST = CONFIG("USER_SERVICE_HOST", cast=str, default="localhost:8000")
 
-DB_HOST = CONFIG("DB_HOST", cast=str, default="localhost")
+DB_HOST = CONFIG("DB_HOST", cast=str, default="localhost:5432")
 DB_NAME = CONFIG("DB_NAME", cast=str, default="db_user_interaction")
 DB_USER = CONFIG("DB_USER", cast=str, default="postgres")
 DB_PASSWORD = CONFIG("DB_PASSWORD", cast=str, default="8045")
