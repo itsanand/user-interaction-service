@@ -20,7 +20,7 @@ ASYNC_DB_ENGINE = create_async_engine(Config.ASYNC_DATABASE_URL)
 
 # Define SQLAlchemy Models
 class Interaction(BASE):  # type: ignore # pylint: disable=too-few-public-methods
-    """User model"""
+    """User Interaction model"""
 
     __tablename__ = "Interaction"
     userID: Column = Column(String)
