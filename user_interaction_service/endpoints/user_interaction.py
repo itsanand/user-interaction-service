@@ -19,7 +19,7 @@ class UserInteractionEndpoint:
     NOT_FOUND: Final[int] = 404
     CREATED: Final[int] = 201
     SUCCESS: Final[int] = 200
-    INTERNAL_AUTH_VAL: Final[str] = "content"
+    INTERNAL_AUTH_VAL: Final[str] = "groot"
     BAD_REQUEST: Final[int] = 404
     SERVER_ERROR: Final[int] = 500
 

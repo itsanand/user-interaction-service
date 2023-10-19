@@ -14,10 +14,10 @@ import user_interaction_service.settings as Config
 class InteractionService:
     """User interaction service class"""
 
-    NOT_FOUND: Final[int] = 404
+    SUCCESS: Final[int] = 200
     DATA_PER_PAGE: Final[int] = 100
     INTERNAL_HEADERS: dict[str, str] = {
-        "x-internal": "interaction",
+        "x-internal": "groot",
     }
 
     def __init__(self, db_engine: AsyncEngine) -> None:
@@ -29,10 +29,12 @@ class InteractionService:
     async def user_exists(cls, user_id: str) -> bool:
         """check if user exists in user service repo"""
 
-        async with AsyncClient(timeout=10.0) as client:
+        async with AsyncClient() as client:
             url: str = f"http://{Config.USER_SERVICE_HOST}/user/{user_id}"
-            user: Response = await client.get(url, headers=cls.INTERNAL_HEADERS)
-            return user.status_code != cls.NOT_FOUND
+            user: Response = await client.get(
+                url, headers=cls.INTERNAL_HEADERS, timeout=10.0
+            )
+            return user.status_code == cls.SUCCESS
 
     async def add_content_like(self, user_id: str, title: str) -> None:
         """Create user interaction entry with like enum"""
