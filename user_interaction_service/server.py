@@ -20,7 +20,7 @@ routes: list[Route] = [
         "/content/{title}/user/{id}/read", user_interaction.add_read, methods=["POST"]
     ),
     Route("/user-interaction-service/docs", swagger_doc.swagger_ui, methods=["GET"]),
-    Route("/spec", swagger_doc.get_spec, methods=["GET"]),
+    Route("/user-interaction-service/spec", swagger_doc.get_spec, methods=["GET"]),
 ]
 
 
